@@ -40,12 +40,18 @@ class DisplayResults {
 		}
 
 		let total = 0
+		let modifierString = null;
 		if(data.hasOwnProperty('value')) {
 			total = data.value
 		} else { 
 			total = rolls.reduce((val,roll) => val + roll.value,0)
 			let modifier = data.reduce((val,roll) => val + roll.modifier,0)
 			total += modifier
+			if (modifier > 0) {
+        modifierString = ` <span class="mod-positive">+${modifier}</span>`;
+      } else if (modifier < 0) {
+        modifierString = ` <span class="mod-negative">${modifier}</span>`;
+      }
 		}
 
 		total = isNaN(total) ? '...' : total
@@ -149,6 +155,7 @@ class DisplayResults {
 
 			resultString += val
 		})
+		resultString += modifierString ?? '';
 		resultString += ` = <strong>${total}</strong>`
 
 		const currentElem = this[`resultsElem${this.even ? 2 : 1}`]
