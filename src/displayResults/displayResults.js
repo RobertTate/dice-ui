@@ -53,12 +53,13 @@ class DisplayResults {
 			Object.keys(obj).forEach(key => {
 				const value = obj[key];
 				if(key === searchKey) {
-					console.log(value);
-					if (value?.[0]?.tail.type === "number") {
-						r.push(value);
-					} else {
-						modSearch(value?.[0]?.tail, searchKey, r)
-					}
+					value.forEach((val) => {
+						if (val.tail.type === "number") {
+							r.push(val);
+						} else {
+							modSearch(val, searchKey, r);
+						}
+					});
 				} else if(value && typeof value === 'object'){
 					modSearch(value, searchKey, r);
 				}
@@ -66,7 +67,7 @@ class DisplayResults {
 			return r;
 		}
 
-		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "math");
+		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "number");
 
 		total = isNaN(total) ? '...' : total
 
