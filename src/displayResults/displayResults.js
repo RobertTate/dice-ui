@@ -27,7 +27,7 @@ class DisplayResults {
 		this.even = false
 	}
 
-	showResults(data){
+	showResults(data, parsedNotationForMods){
 		this.clear(this[`resultsElem${this.even ? 1 : 2}`])
 		let rolls
 		if(data.rolls && !Array.isArray(data.rolls)){
@@ -40,19 +40,27 @@ class DisplayResults {
 		}
 
 		let total = 0
-		let modifierString = null;
+		let modifierString = '';
 		if(data.hasOwnProperty('value')) {
 			total = data.value
 		} else { 
 			total = rolls.reduce((val,roll) => val + roll.value,0)
 			let modifier = data.reduce((val,roll) => val + roll.modifier,0)
 			total += modifier
-			if (modifier > 0) {
-        modifierString = ` <span class="mod-positive">+${modifier}</span>`;
-      } else if (modifier < 0) {
-        modifierString = ` <span class="mod-negative">${modifier}</span>`;
-      }
 		}
+
+		parsedNotationForMods?.ops.filter((op) => {
+			return op?.type === "math" && op?.tail?.type === "number" && op?.op;
+		}).forEach((modifier) => {
+			const value = modifier?.tail?.value;
+			const modMap = {
+				"+": `<span class="mod-positive">+${value}</span>`,
+				"-": `<span class="mod-negative">-${value}</span>`,
+				"*": `<span class="mod-multiply">*${value}</span>`,
+				"/": `<span class="mod-divide">/${value}</span>`
+			};
+			modifierString += modMap?.[modifier?.op] || '';
+		});
 
 		total = isNaN(total) ? '...' : total
 		let resultString = ''
