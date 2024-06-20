@@ -48,9 +48,25 @@ class DisplayResults {
 			total += modifier
 		}
 
-		const modsArray = (parsedNotationForMods?.ops || []).filter((op) => {
-			return op?.type === "math" && op?.tail?.type === "number" && op?.op;
-		});
+		const modSearch = (obj, searchKey, results = []) => {
+			const r = results;
+			Object.keys(obj).forEach(key => {
+				const value = obj[key];
+				if(key === searchKey) {
+					console.log(value);
+					if (value?.[0]?.tail.type === "number") {
+						r.push(value);
+					} else {
+						modSearch(value?.[0]?.tail, searchKey, r)
+					}
+				} else if(value && typeof value === 'object'){
+					modSearch(value, searchKey, r);
+				}
+			});
+			return r;
+		}
+
+		const modsArray = modSearch(parsedNotationForMods, "ops").flat();
 
 		total = isNaN(total) ? '...' : total
 
