@@ -40,7 +40,6 @@ class DisplayResults {
 		}
 
 		let total = 0
-		let modifierString = '';
 		if(data.hasOwnProperty('value')) {
 			total = data.value
 		} else { 
@@ -49,17 +48,8 @@ class DisplayResults {
 			total += modifier
 		}
 
-		(parsedNotationForMods?.ops || []).filter((op) => {
+		const modsArray = (parsedNotationForMods?.ops || []).filter((op) => {
 			return op?.type === "math" && op?.tail?.type === "number" && op?.op;
-		}).forEach((modifier) => {
-			const value = modifier?.tail?.value;
-			const modMap = {
-				"+": `<span class="mod-positive">+${value}</span>`,
-				"-": `<span class="mod-negative">-${value}</span>`,
-				"*": `<span class="mod-multiply">*${value}</span>`,
-				"/": `<span class="mod-divide">/${value}</span>`
-			};
-			modifierString += modMap?.[modifier?.op] || '';
 		});
 
 		total = isNaN(total) ? '...' : total
@@ -109,8 +99,19 @@ class DisplayResults {
 			}
 
 			resultString += val
+
+			if (modsArray[i]) {
+				const modifier = modsArray[i];
+				const value = modifier?.tail?.value;
+				const modMap = {
+					"+": `<span class="mod-positive">+${value}</span>`,
+					"-": `<span class="mod-negative">-${value}</span>`,
+					"*": `<span class="mod-multiply">*${value}</span>`,
+					"/": `<span class="mod-divide">/${value}</span>`
+				};
+				resultString += modMap?.[modifier?.op] || '';
+			}
 		})
-		resultString += modifierString ?? '';
 		resultString += ` = <strong>${total}</strong>`
 
 		const currentElem = this[`resultsElem${this.even ? 2 : 1}`]
