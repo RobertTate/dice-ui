@@ -49,7 +49,7 @@ class DisplayResults {
 			total += modifier
 		}
 
-		parsedNotationForMods?.ops.filter((op) => {
+		(parsedNotationForMods?.ops || []).filter((op) => {
 			return op?.type === "math" && op?.tail?.type === "number" && op?.op;
 		}).forEach((modifier) => {
 			const value = modifier?.tail?.value;
