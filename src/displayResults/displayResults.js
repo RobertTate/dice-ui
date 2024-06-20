@@ -33,7 +33,6 @@ class DisplayResults {
 		if(data.rolls && !Array.isArray(data.rolls)){
 			rolls = Object.values(data.rolls).map(roll => roll)
 		} else {
-			// rolls = this.recursiveSearch(data,'rolls').flat()
 			rolls = Object.values(this.recursiveSearch(data,'rolls')).map(group => {
 				return Object.values(group)
 			}).flat()
@@ -133,7 +132,16 @@ class DisplayResults {
 				resultString += modMap?.[modifier?.op] || '';
 			}
 		})
-		resultString += ` = <strong>${total}</strong>`
+
+		let isSuccess;
+		if (rolls?.length === 1) {
+			const singleRoll = rolls?.[0];
+			isSuccess = singleRoll?.success;
+		}
+
+		resultString += (isSuccess === null || isSuccess === undefined) ? 
+			` = <strong>${total}</strong>` :
+			` = <strong data-success=${isSuccess}>${total}</strong>`
 
 		const currentElem = this[`resultsElem${this.even ? 2 : 1}`]
 		currentElem.innerHTML = resultString
