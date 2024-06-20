@@ -66,7 +66,7 @@ class DisplayResults {
 			return r;
 		}
 
-		const modsArray = modSearch(parsedNotationForMods, "ops").flat();
+		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "math");
 
 		total = isNaN(total) ? '...' : total
 
