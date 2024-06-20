@@ -83,7 +83,7 @@ class DisplayResults {
 			}
 
 			if(roll.success !== undefined && roll.success !== null){
-				val = roll.success ? `<svg class="success"><use href="${checkIcon}#checkmark"></use></svg>` : roll.failures > 0 ? `<svg class="failure"><use href="${cancelIcon}#cancel"></use></svg>` : `<svg class="null"><use href="${minusIcon}#minus"></use></svg>`
+				val = roll.success ? `<svg class="success"><use href="${checkIcon}#checkmark"></use></svg>` : `<svg class="failure"><use href="${cancelIcon}#cancel"></use></svg>`;
 			} else {
 				// convert to string in case value is 0 which would be evaluated as falsy
 				val = roll.hasOwnProperty('value') ? roll.value.toString() : '...'
