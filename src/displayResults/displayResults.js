@@ -70,7 +70,7 @@ class DisplayResults {
 			return r;
 		}
 
-		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "number");
+		const modsArray = modSearch(parsedNotationForMods, "ops").flat();
 
 		total = isNaN(total) ? '...' : total
 
@@ -175,14 +175,16 @@ class DisplayResults {
 
 			if (modsArray[i]) {
 				const modifier = modsArray[i];
-				const value = modifier?.tail?.value;
-				const modMap = {
-					"+": `<span class="mod-positive">+${value}</span>`,
-					"-": `<span class="mod-negative">-${value}</span>`,
-					"*": `<span class="mod-multiply">*${value}</span>`,
-					"/": `<span class="mod-divide">/${value}</span>`
-				};
-				resultString += modMap?.[modifier?.op] || '';
+				if (modifier?.tail?.type === "number") {
+					const value = modifier?.tail?.value;
+					const modMap = {
+						"+": `<span class="mod-positive">+${value}</span>`,
+						"-": `<span class="mod-negative">-${value}</span>`,
+						"*": `<span class="mod-multiply">*${value}</span>`,
+						"/": `<span class="mod-divide">/${value}</span>`
+					};
+					resultString += modMap?.[modifier?.op] || '';
+				}
 			}
 		})
 
