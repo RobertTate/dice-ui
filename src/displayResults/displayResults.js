@@ -73,13 +73,61 @@ class DisplayResults {
 		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "number");
 
 		total = isNaN(total) ? '...' : total
+
+		if(typeof total === 'string'){
+			const counter = {}
+			
+			// count up values
+			function logValue(value) {
+				if(value && typeof value === 'string'){
+					if(counter[value]){
+						counter[value] = counter[value] + 1
+					} else {
+						counter[value] = 1
+					}
+				}
+			}
+			rolls.forEach(roll => {
+				// if value is a string
+				if(typeof roll.value === 'string'){
+					logValue(roll.value)
+				}
+
+				// if value is an array, then loop and count
+				if(Array.isArray(roll.value)){
+					roll.value.forEach(val => {
+						logValue(val)
+					})
+				}
+			})
+
+			// clear total
+			total = ''
+
+			// sort the keys by alpha
+			const sortedCounter = Object.fromEntries(Object.entries(counter).sort())
+
+			// build the result
+			Object.entries(sortedCounter).forEach(([key,val],i) => {
+				if(i!==0){
+					total += ', '
+				}
+				total += key + ": " + val
+			})
+
+		}
+
+
 		let resultString = ''
 
 		rolls.forEach((roll,i) => {
 			let val
 			let sides = roll.die || roll.sides || 'fate'
-			if(i !== 0) {
-				resultString += ', '
+
+			if(i !== 0 && resultString.length) {
+				if(typeof roll.value !== 'undefined' && (roll.value.length || typeof roll.value === 'number')) {
+					resultString += ', '
+				}
 			}
 
 			if(roll.success !== undefined && roll.success !== null){
@@ -87,7 +135,12 @@ class DisplayResults {
 			} else {
 				// convert to string in case value is 0 which would be evaluated as falsy
 				val = roll.hasOwnProperty('value') ? roll.value.toString() : '...'
+				// space comma separated values from arrays
+				if(val.includes(',')){
+					val = val.replace(',', ', ')
+				}
 			}
+
 			let classes = `d${sides}`
 
 			if(roll.critical === "success" || (roll.hasOwnProperty('value') && sides == roll.value)) {
@@ -114,7 +167,7 @@ class DisplayResults {
 				}
 			}
 
-			if(classes !== ''){
+			if(val && classes !== ''){
 				val = `<span class='${classes.trim()}'>${val}</span>`
 			}
 
