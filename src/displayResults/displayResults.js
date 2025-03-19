@@ -1,7 +1,18 @@
 import './displayResults.css'
-import cancelIcon from './icons/cancel.svg'
-import checkIcon from './icons/checkmark.svg'
-import minusIcon from './icons/minus.svg'
+
+const checkIcon = `
+<svg class="success" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<title>checkmark</title>
+<path id="checkmark" d="M16 3c-7.18 0-13 5.82-13 13s5.82 13 13 13 13-5.82 13-13-5.82-13-13-13zM23.258 12.307l-9.486 9.485c-0.238 0.237-0.623 0.237-0.861 0l-0.191-0.191-0.001 0.001-5.219-5.256c-0.238-0.238-0.238-0.624 0-0.862l1.294-1.293c0.238-0.238 0.624-0.238 0.862 0l3.689 3.716 7.756-7.756c0.238-0.238 0.624-0.238 0.862 0l1.294 1.294c0.239 0.237 0.239 0.623 0.001 0.862z"></path>
+</svg>
+`
+
+const cancelIcon = `
+<svg class="failure" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<title>cancel</title>
+<path id="cancel" d="M16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM21.961 12.209c0.244-0.244 0.244-0.641 0-0.885l-1.328-1.327c-0.244-0.244-0.641-0.244-0.885 0l-3.761 3.761-3.761-3.761c-0.244-0.244-0.641-0.244-0.885 0l-1.328 1.327c-0.244 0.244-0.244 0.641 0 0.885l3.762 3.762-3.762 3.76c-0.244 0.244-0.244 0.641 0 0.885l1.328 1.328c0.244 0.244 0.641 0.244 0.885 0l3.761-3.762 3.761 3.762c0.244 0.244 0.641 0.244 0.885 0l1.328-1.328c0.244-0.244 0.244-0.641 0-0.885l-3.762-3.76 3.762-3.762z"></path>
+</svg>
+`
 
 class DisplayResults {
 	constructor(selector) {
@@ -73,21 +84,74 @@ class DisplayResults {
 		const modsArray = modSearch(parsedNotationForMods, "ops").flat().filter((mod) => mod?.tail?.type === "number");
 
 		total = isNaN(total) ? '...' : total
+
+		if(typeof total === 'string'){
+			const counter = {}
+			
+			// count up values
+			function logValue(value) {
+				if(value && typeof value === 'string'){
+					if(counter[value]){
+						counter[value] = counter[value] + 1
+					} else {
+						counter[value] = 1
+					}
+				}
+			}
+			rolls.forEach(roll => {
+				// if value is a string
+				if(typeof roll.value === 'string'){
+					logValue(roll.value)
+				}
+
+				// if value is an array, then loop and count
+				if(Array.isArray(roll.value)){
+					roll.value.forEach(val => {
+						logValue(val)
+					})
+				}
+			})
+
+			// clear total
+			total = ''
+
+			// sort the keys by alpha
+			const sortedCounter = Object.fromEntries(Object.entries(counter).sort())
+
+			// build the result
+			Object.entries(sortedCounter).forEach(([key,val],i) => {
+				if(i!==0){
+					total += ', '
+				}
+				total += key + ": " + val
+			})
+
+		}
+
+
 		let resultString = ''
 
 		rolls.forEach((roll,i) => {
 			let val
 			let sides = roll.die || roll.sides || 'fate'
-			if(i !== 0) {
-				resultString += ', '
+
+			if(i !== 0 && resultString.length) {
+				if(typeof roll.value !== 'undefined' && (roll.value.length || typeof roll.value === 'number')) {
+					resultString += ', '
+				}
 			}
 
 			if(roll.success !== undefined && roll.success !== null){
-				val = roll.success ? `<svg class="success"><use href="${checkIcon}#checkmark"></use></svg>` : `<svg class="failure"><use href="${cancelIcon}#cancel"></use></svg>`;
+				val = roll.success ? checkIcon : cancelIcon;
 			} else {
 				// convert to string in case value is 0 which would be evaluated as falsy
 				val = roll.hasOwnProperty('value') ? roll.value.toString() : '...'
+				// space comma separated values from arrays
+				if(val.includes(',')){
+					val = val.replace(',', ', ')
+				}
 			}
+
 			let classes = `d${sides}`
 
 			if(roll.critical === "success" || (roll.hasOwnProperty('value') && sides == roll.value)) {
@@ -114,7 +178,7 @@ class DisplayResults {
 				}
 			}
 
-			if(classes !== ''){
+			if(val && classes !== ''){
 				val = `<span class='${classes.trim()}'>${val}</span>`
 			}
 
