@@ -207,6 +207,14 @@ class DisplayResults {
 			` = <strong>${total}</strong>` :
 			` = <strong data-success=${isSuccess}>${total}</strong>`
 
+
+		if (data.label && typeof data.label === "string" && data.label.includes("#")){
+			const labelToAdd = data.label.split("#")[1];
+			if (labelToAdd) {
+				resultString += `<span class="dice-result-label">${labelToAdd}</span>`
+			}
+		}
+
 		const currentElem = this[`resultsElem${this.even ? 2 : 1}`]
 		currentElem.innerHTML = resultString
 		// this.resultsElem.classList.remove('hideEffect')
